@@ -61,6 +61,7 @@ jobs:
           -p:CopyOutputSymbolsToPublishDirectory=false
           -p:Version=${{ steps.ver.outputs.version }}
           -p:BuildingForCI=true
+          -o publish-out
 
       - name: Publish Updater (${{ matrix.rid }}, AOT)
         run: >
@@ -77,7 +78,7 @@ jobs:
       - name: Bundle updater into staging
         shell: pwsh
         run: |
-          $publishDir = "bin/Release/net10.0-windows10.0.19041.0/${{ matrix.rid }}/publish"
+          $publishDir = "publish-out"
           $updaterExe = "updater-out/XrayUI.Updater.exe"
           if (-not (Test-Path $updaterExe)) {
             Write-Host "::error::Updater publish did not produce $updaterExe"
@@ -89,7 +90,7 @@ jobs:
       - name: Verify AOT exe produced
         shell: pwsh
         run: |
-          $publishDir = "bin/Release/net10.0-windows10.0.19041.0/${{ matrix.rid }}/publish"
+          $publishDir = "publish-out"
           $exe = "$publishDir/XrayUI-dev.exe"
           Write-Host "Listing $publishDir :"
           if (Test-Path $publishDir) {
@@ -106,7 +107,7 @@ jobs:
       - name: Pack zip
         shell: pwsh
         run: |
-          $publishDir = "bin/Release/net10.0-windows10.0.19041.0/${{ matrix.rid }}/publish"
+          $publishDir = "publish-out"
           $zipName = "XrayUI-${{ matrix.rid }}.zip"
           Compress-Archive -Path "$publishDir/*" -DestinationPath $zipName -CompressionLevel Optimal
           Write-Host "Created $zipName ($((Get-Item $zipName).Length) bytes)"
