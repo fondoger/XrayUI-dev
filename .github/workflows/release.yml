@@ -12,7 +12,7 @@ permissions:
 jobs:
   publish:
     name: publish ${{ matrix.rid }} (AOT)
-    runs-on: windows-latest
+    runs-on: ${{ matrix.runner }}
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -20,12 +20,10 @@ jobs:
         include:
           - rid: win-x64
             platform: x64
-          # Only win-x64 ships. To add a platform, append a matrix entry, e.g.
-          #   - rid: win-x86
-          #     platform: x86
-          #   - rid: win-arm64
-          #     platform: ARM64
-          # Note: AOT cross-compile to arm64 may require a windows-11-arm runner.
+            runner: windows-latest
+          - rid: win-arm64
+            platform: ARM64
+            runner: windows-11-arm
 
     steps:
       - name: Checkout
