@@ -1,5 +1,4 @@
 ﻿using Microsoft.UI.Dispatching;
-using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Media;
 using System;
 using System.Threading;
@@ -39,6 +38,8 @@ namespace XrayUI.Views
             Func<Task> reapplyConfigAsync)
         {
             this.InitializeComponent();
+            ThemeHelper.RegisterThemeAwareWindow(this);
+
             _xray               = xray;
             _settings           = settings;
             _reapplyConfigAsync = reapplyConfigAsync;
@@ -46,8 +47,6 @@ namespace XrayUI.Views
 
             this.SetWindowSize(900, 600);
             AppWindow.Title = L.Log_Title;
-			AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
-
 			ToolTipService.SetToolTip(LogPrivacyButton, L.Log_PrivacyTooltip);
             MaskAddressSubMenu.Text = L.Log_IpMask;
             MaskOffMenuItem.Text    = L.Log_MaskOff;
