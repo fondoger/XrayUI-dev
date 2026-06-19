@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml.Media;
 
 namespace XrayUI.Helpers
@@ -17,6 +19,7 @@ namespace XrayUI.Helpers
         // allocate a fresh DComp controller each time.
         private static MicaBackdrop? _micaBackdrop;
         private static DesktopAcrylicBackdrop? _acrylicBackdrop;
+        private static readonly List<(Window Window, FrameworkElement RootElement)> _themeAwareWindows = new();
 
         /// <summary>Actual resolved theme (Light or Dark) based on current setting.</summary>
         public static ElementTheme ActualTheme
@@ -27,6 +30,37 @@ namespace XrayUI.Helpers
             _currentTheme = theme;
             if (RootElement != null)
                 RootElement.RequestedTheme = theme;
+
+            foreach (var registration in _themeAwareWindows.ToArray())
+            {
+                registration.RootElement.RequestedTheme = theme;
+                ApplyTitleBarTheme(registration.Window, registration.RootElement);
+            }
+        }
+
+        public static void RegisterThemeAwareWindow(Window window)
+        {
+            var rootElement = (FrameworkElement)window.Content;
+            var registration = (window, rootElement);
+            _themeAwareWindows.Add(registration);
+
+            rootElement.RequestedTheme = _currentTheme;
+            ApplyTitleBarTheme(window, rootElement);
+
+            rootElement.ActualThemeChanged += OnActualThemeChanged;
+            window.Closed += OnClosed;
+
+            void OnActualThemeChanged(FrameworkElement sender, object args)
+            {
+                ApplyTitleBarTheme(window, rootElement);
+            }
+
+            void OnClosed(object sender, WindowEventArgs args)
+            {
+                rootElement.ActualThemeChanged -= OnActualThemeChanged;
+                window.Closed -= OnClosed;
+                _themeAwareWindows.Remove(registration);
+            }
         }
 
         public static void ApplyBackdrop(string backdrop)
@@ -40,6 +74,16 @@ namespace XrayUI.Helpers
                 _         => _micaBackdrop ??= new MicaBackdrop(),
             };
             _currentBackdrop = backdrop;
+        }
+
+        private static void ApplyTitleBarTheme(Window window, FrameworkElement rootElement)
+        {
+            window.AppWindow.TitleBar.PreferredTheme = rootElement.ActualTheme switch
+            {
+                ElementTheme.Light => TitleBarTheme.Light,
+                ElementTheme.Dark  => TitleBarTheme.Dark,
+                _                  => TitleBarTheme.UseDefaultAppMode
+            };
         }
     }
 }

@@ -27,11 +27,12 @@ namespace XrayUI.Views
         {
             ViewModel = viewModel;
             this.InitializeComponent();
+            ThemeHelper.RegisterThemeAwareWindow(this);
+
             _owner = owner;
 
             this.SetWindowSize(620, 460);
             AppWindow.Title = L.CustomRules_Title;
-			AppWindow.TitleBar.PreferredTheme = TitleBarTheme.UseDefaultAppMode;
 
             ToolTipService.SetToolTip(OpenAdvancedEditorButton, L.CustomRules_AdvancedEditorTooltip);
             ToolTipService.SetToolTip(UpdateGeoButton,          L.CustomRules_UpdateGeoTooltip);
